@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Traffic Dashboard | Canlı Trafik</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #000; }
+        #map { height: 100vh; width: 100%; position: absolute; z-index: 1; }
+
+        /* Üst Başlık Paneli */
+        .header-bar {
+            position: absolute; top: 0; left: 0; right: 0;
+            background: rgba(18, 18, 18, 0.85); backdrop-filter: blur(10px);
+            color: white; padding: 12px 20px; z-index: 1001;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #4285F4; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .header-bar h1 { margin: 0; font-size: 16px; font-weight: 600; color: #e8eaed; letter-spacing: 0.5px; }
+        .api-tag { background: #34a853; font-size: 10px; padding: 3px 8px; border-radius: 4px; font-weight: bold; }
+
+        /* Arama Kutusu Konumu (Üst panelin altına çekildi) */
+        .leaflet-control-geocoder { 
+            border-radius: 8px !important; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important; 
+            margin-top: 70px !important; 
+            margin-right: 20px !important; 
+        }
+
+        /* İşaretçi Silme Butonu */
+        .delete-btn {
+            background: #d93025; color: white; border: none;
+            padding: 5px 10px; border-radius: 4px; cursor: pointer;
+            margin-top: 8px; width: 100%; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-bar">
+        <h1>🌍 DÜNYA CANLI TRAFİK YOĞUNLUĞU</h1>
+        <div class="api-tag">API: AKTİF</div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+
+    <script>
+        // 1. API ve Harita İlk Kurulum
+        const API_KEY = "uWD6Bs17qsOMpQY9yMZJejwu6YnErjWk";
+        var map = L.map('map', { zoomControl: false }).setView([41.0082, 28.9784], 11);
+
+        // Google Canlı Trafik Katmanı
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m,traffic&x={x}&y={y}&z={z}&key=' + API_KEY, {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            attribution: '© Google Maps Traffic'
+        }).addTo(map);
+
+        // Zoom kontrolü (Sağ alt)
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // 2. Arama Kutusu (Geocoder) - Durum tutmaz, sadece yönlendirir
+        L.Control.geocoder({
+            defaultMarkGeocode: false,
+            placeholder: "Şehir veya adres ara...",
+            errorMessage: "Sonuç bulunamadı."
+        })
+        .on('markgeocode', function(e) {
+            map.flyTo(e.geocode.center, 13);
+        })
+        .addTo(map);
+
+        // 3. Sağ Tık Etkileşimi (Geçici İşaretçiler)
+        // Artık favorilere eklemez, sadece tıkladığın yeri geçici olarak işaretler.
+        map.on('contextmenu', (e) => {
+            const marker = L.marker(e.latlng).addTo(map);
+            
+            const popupDiv = document.createElement('div');
+            popupDiv.innerHTML = `
+                <b>İşaretli Konum</b><br>
+                <small>${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}</small><br>
+                <button class="delete-btn">Kaldır</button>
+            `;
+            
+            popupDiv.querySelector('.delete-btn').onclick = () => map.removeLayer(marker);
+            
+            marker.bindPopup(popupDiv).openPopup();
+        });
+
+    </script>
+</body>
+</html>
