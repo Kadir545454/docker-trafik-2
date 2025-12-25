@@ -1,0 +1,14 @@
+.fav-panel {
+    position: absolute; top: 100px; left: 10px;
+    background: white; padding: 10px; width: 150px;
+    z-index: 1000; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+.fav-item {
+    cursor: pointer; padding: 5px; border-bottom: 1px solid #eee;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.fav-item:hover { background: #f9f9f9; }
+.add-fav-btn {
+    background: #4CAF50; color: white; border: none;
+    padding: 5px; border-radius: 4px; cursor: pointer; width: 100%;
+}
